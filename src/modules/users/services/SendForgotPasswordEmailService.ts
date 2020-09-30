@@ -1,4 +1,5 @@
 import AppError from '@shared/errors/AppError';
+import path from 'path';
 import IUsersRepository from '../repositories/IUsersRepository';
 import IUserTokensRepository from '../repositories/IUserTokensRepository';
 import IMailProvider from '@shared/container/providers/MailProvider/models/IMailProvider';
@@ -32,6 +33,8 @@ class SendForgotPasswordEmailService {
 
     const { token } = await this.userTokensRepository.generate(user.id);
 
+    const forgotPasswordTemplate = path.resolve(__dirname, '..', 'views', 'forgotPassword.hbs');
+
     await this.mailProvider.sendMail({
       to: {
         name: user.name,
@@ -39,9 +42,10 @@ class SendForgotPasswordEmailService {
       },
       subject: 'Recuperação de senha',
       templateData: {
-        template: 'Olá, {{name}}',
+        file: forgotPasswordTemplate,
         variables: {
           name: user.name,
+          link: `http://localhost:3000/reset_password?token=${token}`
         }
       }
     });
